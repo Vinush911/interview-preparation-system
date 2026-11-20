@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Interview Prep Pack · PrepMate AI{% endblock %}
+{% block head %}<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>{% endblock %}
+{% block body %}
+<main class="wrap wide">
+  <div class="toprow"><div><div class="eyebrow">YOUR PREPARATION PACK</div><h1 class="smalltitle">You're one step closer.</h1><p class="muted">{{ pack.title }} · {{ pack.created }}</p></div><a class="secondary" href="/">＋ New pack</a></div>
+  <div class="actions"><button class="primary" onclick="window.print()">🖨️ Print / Save PDF</button><button class="secondary" id="copy">📋 Copy content</button><a class="secondary" href="/history">Saved packs</a></div>
+  <article id="content" class="content"></article>
+  <script>
+  const raw={{ pack.content|tojson }};
+  document.getElementById('content').innerHTML=marked.parse(raw);
+  document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(raw);document.getElementById('copy').textContent='✓ Copied'};
+  </script>
+</main>
+{% endblock %}

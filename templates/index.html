@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="wrap">
+  <div class="eyebrow">✨ AI-POWERED INTERVIEW COACH</div>
+  <h1>Prepare smarter.<br><span>Answer with confidence.</span></h1>
+  <p class="lead">Upload your notes, textbook pages, PPT or resume. PrepMate turns your material into role-focused interview questions, model answers and a revision plan.</p>
+  <div class="steps"><div><b>01 · Upload</b><small>PDF, DOCX, PPTX or TXT</small></div><div><b>02 · Generate</b><small>Groq creates your prep pack</small></div><div><b>03 · Practise</b><small>Revise questions and answers</small></div></div>
+  <section class="panel">
+    <form id="form">
+      <label>Upload your material</label>
+      <div class="drop" id="drop"><div class="fileicon">📄</div><b>Drop files here or click to browse</b><small>Resume, textbook, class notes or presentation · Max 20 MB</small></div>
+      <input id="files" type="file" name="files" multiple accept=".pdf,.docx,.pptx,.txt,.md" hidden>
+      <div id="filelist" class="filelist"></div>
+      <label for="role">Target job role</label><input id="role" name="role" placeholder="e.g. Software Developer, Data Analyst, ML Engineer">
+      <div class="twocol"><div><label for="level">Experience level</label><select id="level" name="level"><option>Fresher</option><option>Intern</option><option>Experienced</option></select></div><div><label for="focus">Preparation focus</label><select id="focus" name="focus"><option>Balanced technical and HR preparation</option><option>Mostly technical questions</option><option>Mostly HR and behavioural questions</option><option>Project and resume-based questions</option></select></div></div>
+      <details><summary>Or paste text instead</summary><textarea name="text" id="text" placeholder="Paste notes, resume text or textbook content..."></textarea></details>
+      <button class="primary" id="submit" type="submit">⚡ Generate interview preparation</button>
+      <p id="error" class="error"></p>
+    </form>
+  </section>
+  <p class="note">Tip: For the best results, upload a text-based PDF or DOCX. Scanned image-only PDFs may not extract correctly.</p>
+</main>
+<div class="loading" id="loading"><div class="loader"></div><h2>Building your interview prep pack…</h2><p>Reading material and preparing likely questions</p></div>
+<script>
+const filesInput=document.getElementById('files'), drop=document.getElementById('drop'), list=document.getElementById('filelist');
+let selected=[];
+function render(){list.innerHTML='';selected.forEach((f,i)=>{let row=document.createElement('div');row.className='file';let name=document.createElement('span');name.textContent='📎 '+f.name+' · '+(f.size/1024/1024).toFixed(2)+' MB';let remove=document.createElement('button');remove.type='button';remove.textContent='✕';remove.onclick=()=>{selected.splice(i,1);render()};row.append(name,remove);list.append(row)})}
+drop.onclick=()=>filesInput.click();
+filesInput.onchange=()=>{selected.push(...filesInput.files);render();filesInput.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');selected.push(...e.dataTransfer.files);render()};
+document.getElementById('form').onsubmit=async e=>{
+ e.preventDefault();const error=document.getElementById('error');error.textContent='';
+ const text=document.getElementById('text').value.trim();
+ if(!selected.length&&!text){error.textContent='Upload a file or paste text first.';return}
+ const fd=new FormData(e.target);fd.delete('files');selected.forEach(f=>fd.append('files',f));
+ document.getElementById('loading').classList.add('show');document.getElementById('submit').disabled=true;
+ try{const r=await fetch('/generate',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw Error(d.error||'Generation failed');location.href='/pack/'+d.id}
+ catch(err){error.textContent=err.message;document.getElementById('loading').classList.remove('show');document.getElementById('submit').disabled=false}
+};
+</script>
+{% endblock %}

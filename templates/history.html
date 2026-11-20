@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="wrap wide"><div class="eyebrow">YOUR LIBRARY</div><h1 class="smalltitle">Saved preparation packs</h1><p class="lead">Open a previous interview preparation pack.</p>
+{% if items %}<div class="cards">{% for item in items %}<div class="saved"><b>{{ item.title }}</b><small>{{ item.created }}</small><div class="actions"><a class="primary mini" href="/pack/{{ item.id }}">Open pack</a><button class="secondary mini" onclick="removePack('{{ item.id }}',this)">Delete</button></div></div>{% endfor %}</div>
+{% else %}<section class="panel empty">No saved packs yet. <a href="/">Create your first one →</a></section>{% endif %}
+</main>
+<script>async function removePack(id,btn){if(!confirm('Delete this pack?'))return;await fetch('/delete/'+id,{method:'POST'});btn.closest('.saved').remove()}</script>
+{% endblock %}
